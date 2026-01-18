@@ -82,8 +82,9 @@ This script is optimized to run **hourly** on GitHub Actions for free (approx. 7
 ### 1. Configure Secrets
 Go to your repository on GitHub:
 1. Navigate to **Settings > Secrets and variables > Actions**.
-2. Click **New repository secret**.
-3. Add the following secrets:
+2. Scroll down to **Repository secrets** (do not use Environment secrets).
+3. Click **New repository secret**.
+4. Add the following two secrets:
     - `GOODREADS_RSS_URL`
     - `HARDCOVER_API_TOKEN`
 
