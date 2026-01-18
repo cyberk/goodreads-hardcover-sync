@@ -102,19 +102,34 @@ async function discoverGoodreadsRSS() {
         }
         
         const html = await response.text();
-        // Look for RSS link
-        // Identifying characteristic: Matches pattern of RSS link
-        const rssMatch = html.match(/https:\/\/www\.goodreads\.com\/review\/list_rss\/[0-9]+\?shelf=read[^"]*/);
         
-        if (rssMatch) {
-            // Need to decode HTML entities if present (e.g. &amp;)
-            RSS_URL = rssMatch[0].replace(/&amp;/g, '&');
+        // Use DOM Parser for robust finding
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        
+        // Find any link containing 'list_rss'
+        // Usually located in footer or bottom of list
+        const rssLink = doc.querySelector('a[href*="/review/list_rss/"]');
+        
+        if (rssLink) {
+            let href = rssLink.getAttribute('href');
+            
+            // Fix relative URLs
+            if (href.startsWith('/')) {
+                href = `https://www.goodreads.com${href}`;
+            }
+            
+            // Ensure shelf=read is in there, if not, append or warn?
+            // Usually the page 'shelf=read' generates a 'shelf=read' RSS link.
+            // But let's actally trust the link found on the page.
+            
+            RSS_URL = href;
             await chrome.storage.local.set({ rss_url: RSS_URL });
             setStatus(statusGoodreads, "Detected", true);
             Utils.log("Reference found for Goodreads RSS.", "success");
         } else {
             setStatus(statusGoodreads, "Not Found", false);
-            Utils.log("Could not find RSS link on Goodreads page.", "error");
+            Utils.log("Could not find RSS link on Goodreads page. Make sure you are logged in.", "error");
         }
 
     } catch (e) {
