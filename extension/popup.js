@@ -312,7 +312,8 @@ async function searchHardcoverBookId(title, author, isbn) {
     finalList.sort((a, b) => (b.users_count || 0) - (a.users_count || 0));
 
     const winner = finalList[0];
-    Utils.log(`Match: '${winner.title}' (Src: ${winner.match_source}, Users: ${winner.users_count})`, "debug");
+    // Utils.log(`Match: '${winner.title}' (Src: ${winner.match_source}, Users: ${winner.users_count})`, "debug");
+    console.log(`Match: '${winner.title}' (Src: ${winner.match_source}, Users: ${winner.users_count})`);
     
     return winner.id;
 }
@@ -408,7 +409,7 @@ async function runSync() {
         }
 
         // --- New Book ---
-        Utils.log(`Found new book: ${entry.title}`, "info");
+        // Utils.log(`Found new book: ${entry.title}`, "info");
 
         // Parse Date
         let readDate = null;
