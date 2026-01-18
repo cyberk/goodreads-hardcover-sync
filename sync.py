@@ -147,7 +147,7 @@ def search_hardcover_book_id(title, author, isbn=None):
     logger.debug(f"Searching for exact title: '{title}'")
     query = """
     query SearchBooks($title: String!) {
-      books(where: {title: {_eq: $title}}, limit: 10) {
+      books(where: {title: {_eq: $title}}, limit: 10, order_by: {users_count: desc}) {
         id
         title
         users_count
