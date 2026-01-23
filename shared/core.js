@@ -191,15 +191,17 @@ export class SyncEngine {
                     this.log(`✅ Added: ${entry.title}`, 'success');
 
                     // Handle Date
-                    // Fix: Parse date robustly from RSS string "Sat, 20 Jan 2024 07:13:00 -0800"
-                    // to obtain the "Calendar Date" found in the string, avoiding UTC shift.
-                    if (entry.user_read_at) {
-                        this.log(`Received Date: '${entry.user_read_at}'`, 'debug');
+                    // Handle Date
+                    // Logic: Prefer 'user_read_at'. Fallback to 'user_date_added' if missing.
+                    const rawDate = entry.user_read_at || entry.user_date_added;
+                    
+                    if (rawDate) {
+                        this.log(`Received Date: '${rawDate}' (Source: ${entry.user_read_at ? 'Read At' : 'Date Added'})`, 'debug');
                         let dateStr = null;
                         
                         // Strategy 1: Try to capture "DD Mon YYYY" directly from standard RSS format
                         // Example: "Sat, 20 Jan 2024..."
-                        const match = entry.user_read_at.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/);
+                        const match = rawDate.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/);
                         if (match) {
                             const [_, day, monthStr, year] = match;
                             // Convert Month "Jan" -> "01"
@@ -212,7 +214,7 @@ export class SyncEngine {
 
                         // Strategy 2: Fallback to JS Date if regex fails (simplified)
                         if (!dateStr) {
-                             const d = new Date(entry.user_read_at);
+                             const d = new Date(rawDate);
                              if (!isNaN(d)) {
                                  // Use YYYY-MM-DD from the parsed date (WARNING: Timezone shift possibility if env is UTC)
                                  dateStr = d.toISOString().split('T')[0];
@@ -223,8 +225,10 @@ export class SyncEngine {
                             this.log(`Adding Read Date: ${dateStr}`, 'info');
                             await this.addReadDate(userBookId, dateStr);
                         } else {
-                            this.log(`Could not parse date: '${entry.user_read_at}'`, 'warn');
+                            this.log(`Could not parse date: '${rawDate}'`, 'warn');
                         }
+                    } else {
+                        this.log(`No date found for '${entry.title}' (read_at and date_added both empty)`, 'warn');
                     }
                 } else {
                     this.log(`❌ Failed to add: ${entry.title}`, 'error');
