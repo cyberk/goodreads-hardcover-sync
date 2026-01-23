@@ -1,6 +1,7 @@
 /**
  * Hardcover Sync Extension Logic
  */
+import { Utils } from './utils.js';
 
 const HC_ENDPOINT = "https://api.hardcover.app/v1/graphql";
 let HC_TOKEN = null;
