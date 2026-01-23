@@ -35,13 +35,23 @@ async function checkAndNotify(tabId) {
     if (!HC_TOKEN || !RSS_URL) return; 
 
     // 2. Dry Run Check
+    console.log("Starting Dry Run...");
     const newBooksCount = await runSync(tabId, true); // Dry Run
+    console.log(`Dry Run Complete. Found ${newBooksCount} new books.`);
     
     if (newBooksCount > 0) {
-        chrome.tabs.sendMessage(tabId, {
-            action: 'SHOW_MODAL',
-            data: { newCount: newBooksCount }
-        });
+        console.log("Sending SHOW_MODAL message...");
+        try {
+            chrome.tabs.sendMessage(tabId, {
+                action: 'SHOW_MODAL',
+                data: { newCount: newBooksCount }
+            });
+            console.log("Message sent.");
+        } catch (e) {
+            console.error("Failed to send message:", e);
+        }
+    } else {
+        console.log("No new books found, staying silent.");
     }
 }
 
