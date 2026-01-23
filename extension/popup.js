@@ -95,21 +95,23 @@ async function discoverGoodreadsRSS() {
     Utils.log("Checking Goodreads session...", "debug");
     try {
         // Fetch "Read" shelf
+        Utils.log("Fetching Goodreads 'Read' shelf...", "debug");
         const response = await fetch("https://www.goodreads.com/review/list?shelf=read");
+        
         if (response.url.includes("user/sign_in")) {
             setStatus(statusGoodreads, "Login Required", false);
             Utils.log("Please log in to Goodreads.com in a new tab.", "error");
             return;
         }
         
+        Utils.log("Parsing Goodreads response...", "debug");
         const html = await response.text();
         
         // Use DOM Parser for robust finding
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
         
-        // Find any link containing 'list_rss'
-        // Usually located in footer or bottom of list
+        Utils.log("Scanning DOM for RSS link...", "debug");
         const rssLink = doc.querySelector('a[href*="/review/list_rss/"]');
         
         if (rssLink) {
