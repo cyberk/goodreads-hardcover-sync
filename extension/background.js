@@ -134,9 +134,7 @@ async function runSync(tabId, isDryRun) {
             if (!bookId) {
                 console.log(`[No Match] Could not find '${entry.title}' in Hardcover.`);
                 if (isDryRun) {
-                    // Do NOT count unmatchable books. 
-                    // If we can't add them, we shouldn't notify.
-                    // newBooksFound++; 
+                    // Do NOT count unmatchable books (Fixed)
                 } else if (tabId) {
                     chrome.tabs.sendMessage(tabId, { action: 'UPDATE_LOG', message: `⚠️ No match: ${entry.title}`, type: 'warn' });
                 }
@@ -173,6 +171,9 @@ async function runSync(tabId, isDryRun) {
             } else {
                  if (tabId) chrome.tabs.sendMessage(tabId, { action: 'UPDATE_LOG', message: `❌ Failed to add: ${entry.title}`, type: 'error' });
             }
+            
+            // Rate Limit Protection (Inside Loop)
+            await new Promise(r => setTimeout(r, 500));
         }
         
         if (!isDryRun && tabId) {
@@ -187,10 +188,6 @@ async function runSync(tabId, isDryRun) {
     }
 }
 
-// --- API Helpers (Duplicated from popup.js or Imported? Import is better if module) ---
-// Since we have Utils in module, we can put these there? 
-// Or just copy for now to avoid refactoring Utils too much.
-
 async function graphqlQuery(query, variables) {
     const authHeader = HC_TOKEN.startsWith("Bearer ") ? HC_TOKEN : `Bearer ${HC_TOKEN}`;
     const res = await fetch(HC_ENDPOINT, {
@@ -198,9 +195,19 @@ async function graphqlQuery(query, variables) {
         headers: { 'Content-Type': 'application/json', 'Authorization': authHeader },
         body: JSON.stringify({ query, variables })
     });
-    // Add token refresh logic here similar to popup.js if needed
-    if (!res.ok) throw new Error("API Error");
-    return await res.json();
+    
+    if (!res.ok) {
+        const text = await res.text();
+        console.error(`API Error ${res.status}: ${res.statusText}`, text);
+        throw new Error(`API Error ${res.status}: ${res.statusText}`);
+    }
+    
+    const json = await res.json();
+    if (json.errors) {
+        console.error("GraphQL Errors:", json.errors);
+        throw new Error("GraphQL Error: " + JSON.stringify(json.errors));
+    }
+    return json;
 }
 
 // ... (Copy getHardcoverLibraryIds, searchHardcoverBookId, addBookToHardcover from popup.js)
