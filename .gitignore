@@ -7,3 +7,4 @@ venv/
 introspect_api.py
 debug_*.py
 verify_*.py
+node_modules/
