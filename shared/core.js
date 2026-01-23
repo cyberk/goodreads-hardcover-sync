@@ -191,10 +191,39 @@ export class SyncEngine {
                     this.log(`✅ Added: ${entry.title}`, 'success');
 
                     // Handle Date
+                    // Fix: Parse date robustly from RSS string "Sat, 20 Jan 2024 07:13:00 -0800"
+                    // to obtain the "Calendar Date" found in the string, avoiding UTC shift.
                     if (entry.user_read_at) {
-                        const d = new Date(entry.user_read_at);
-                        if (!isNaN(d)) {
-                            await this.addReadDate(userBookId, d.toISOString().split('T')[0]);
+                        this.log(`Received Date: '${entry.user_read_at}'`, 'debug');
+                        let dateStr = null;
+                        
+                        // Strategy 1: Try to capture "DD Mon YYYY" directly from standard RSS format
+                        // Example: "Sat, 20 Jan 2024..."
+                        const match = entry.user_read_at.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/);
+                        if (match) {
+                            const [_, day, monthStr, year] = match;
+                            // Convert Month "Jan" -> "01"
+                            const months = {Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12'};
+                            const month = months[monthStr];
+                            if (month) {
+                                dateStr = `${year}-${month}-${day.padStart(2, '0')}`;
+                            }
+                        }
+
+                        // Strategy 2: Fallback to JS Date if regex fails (simplified)
+                        if (!dateStr) {
+                             const d = new Date(entry.user_read_at);
+                             if (!isNaN(d)) {
+                                 // Use YYYY-MM-DD from the parsed date (WARNING: Timezone shift possibility if env is UTC)
+                                 dateStr = d.toISOString().split('T')[0];
+                             }
+                        }
+
+                        if (dateStr) {
+                            this.log(`Adding Read Date: ${dateStr}`, 'info');
+                            await this.addReadDate(userBookId, dateStr);
+                        } else {
+                            this.log(`Could not parse date: '${entry.user_read_at}'`, 'warn');
                         }
                     }
                 } else {
