@@ -2,7 +2,7 @@
  * Utility functions for Hardcover Sync Extension
  */
 
-const Utils = {
+export const Utils = {
     // Port of thefuzz's token_sort_ratio basic approximation or standard levenshtein
     // Since we just need a decent fuzzy match, Levenshtein Distance is usually enough.
     // We normalize simple token sort by sorting words first.

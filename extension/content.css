@@ -1,0 +1,97 @@
+/* Hardcover Sync Modal */
+#hc-sync-modal-overlay {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 999999;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    animation: hc-slide-in 0.3s ease-out;
+    color: #1f2937;
+    overflow: hidden;
+}
+
+@keyframes hc-slide-in {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+#hc-sync-header {
+    background: #111827; /* Hardcover Dark */
+    color: white;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#hc-sync-close {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    padding: 0;
+    line-height: 1;
+}
+#hc-sync-close:hover { opacity: 1; }
+
+#hc-sync-body {
+    padding: 16px;
+}
+
+.hc-sync-text {
+    font-size: 14px;
+    color: #4b5563;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.hc-btn {
+    width: 100%;
+    padding: 8px 16px;
+    background-color: #2563eb;
+    color: white;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+.hc-btn:hover { background-color: #1d4ed8; }
+.hc-btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+.hc-btn.secondary {
+    background-color: transparent;
+    color: #6b7280;
+    margin-top: 8px;
+    font-size: 12px;
+    padding: 4px;
+}
+.hc-btn.secondary:hover { color: #374151; background: none; }
+
+/* Status Indicators */
+.hc-log-container {
+    max-height: 150px;
+    overflow-y: auto;
+    background: #f3f4f6;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 11px;
+    font-family: monospace;
+    margin-top: 12px;
+    display: none; /* Hidden by default */
+}
+.hc-log-entry { margin-bottom: 4px; }
+.hc-log-success { color: #059669; }
+.hc-log-warn { color: #d97706; }
+.hc-log-error { color: #dc2626; }
