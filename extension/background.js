@@ -173,7 +173,7 @@ async function runSync(tabId, isDryRun) {
             }
             
             // Rate Limit Protection (Inside Loop)
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 1000));
         }
         
         if (!isDryRun && tabId) {
@@ -188,26 +188,49 @@ async function runSync(tabId, isDryRun) {
     }
 }
 
-async function graphqlQuery(query, variables) {
+async function graphqlQuery(query, variables, retries = 3) {
     const authHeader = HC_TOKEN.startsWith("Bearer ") ? HC_TOKEN : `Bearer ${HC_TOKEN}`;
-    const res = await fetch(HC_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': authHeader },
-        body: JSON.stringify({ query, variables })
-    });
     
-    if (!res.ok) {
-        const text = await res.text();
-        console.error(`API Error ${res.status}: ${res.statusText}`, text);
-        throw new Error(`API Error ${res.status}: ${res.statusText}`);
+    try {
+        const res = await fetch(HC_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': authHeader },
+            body: JSON.stringify({ query, variables })
+        });
+        
+        // Handle Rate Limiting (429)
+        if (res.status === 429) {
+            if (retries > 0) {
+                console.warn(`[API] Throttled (429). Waiting 3s... (Retries left: ${retries})`);
+                await new Promise(r => setTimeout(r, 3000));
+                return graphqlQuery(query, variables, retries - 1);
+            } else {
+                throw new Error("API Error 429: Throttled (Max retries reached)");
+            }
+        }
+
+        if (!res.ok) {
+            const text = await res.text();
+            console.error(`API Error ${res.status}: ${res.statusText}`, text);
+            throw new Error(`API Error ${res.status}: ${res.statusText}`);
+        }
+        
+        const json = await res.json();
+        if (json.errors) {
+            console.error("GraphQL Errors:", json.errors);
+            throw new Error("GraphQL Error: " + JSON.stringify(json.errors));
+        }
+        return json;
+
+    } catch (e) {
+        // Network errors?
+        if (retries > 0 && e.message.includes("Failed to fetch")) {
+             console.warn(`[API] Network Error. Waiting 2s...`);
+             await new Promise(r => setTimeout(r, 2000));
+             return graphqlQuery(query, variables, retries - 1);
+        }
+        throw e;
     }
-    
-    const json = await res.json();
-    if (json.errors) {
-        console.error("GraphQL Errors:", json.errors);
-        throw new Error("GraphQL Error: " + JSON.stringify(json.errors));
-    }
-    return json;
 }
 
 // ... (Copy getHardcoverLibraryIds, searchHardcoverBookId, addBookToHardcover from popup.js)
