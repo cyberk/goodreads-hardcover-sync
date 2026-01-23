@@ -92,23 +92,24 @@ async function runSync(tabId, isDryRun) {
         const processList = entries.slice(0, limit).reverse();
         
         let newBooksFound = 0;
+        console.log(`Processing ${processList.length} recent books from RSS...`);
         
         for (const entry of processList) {
             // Cache Checks
-            if (entry.isbn13 && existingIsbns.has(entry.isbn13)) continue;
-            if (existingTitles.has(entry.title.trim().toLowerCase())) continue;
+            if (entry.isbn13 && existingIsbns.has(entry.isbn13)) {
+                console.log(`[DryRun] Skipped '${entry.title}' (ISBN Cache Hit)`);
+                continue;
+            }
+            if (existingTitles.has(entry.title.trim().toLowerCase())) {
+                 console.log(`[DryRun] Skipped '${entry.title}' (Title Cache Hit)`);
+                 continue;
+            }
 
             // It's a candidate!
+            console.log(`[DryRun] Candidate Found: '${entry.title}'`);
             if (isDryRun) {
                 // In dry run, we don't do the heavy API search for every book 
                 // to save rate limits/time. We just assume Cache Miss = Potential New Book.
-                // Or we can do the search to be precise. Let's do search to be precise.
-                
-                // Note: Doing 20 searches might be slow for a page load trigger.
-                // Optimization: Just count cache misses? 
-                // Risk: Cache miss might still result in "No Match Found" effectively filtering it out.
-                
-                // Let's do a lightweight check: If cache miss, count it.
                 newBooksFound++;
                 continue; 
             }
