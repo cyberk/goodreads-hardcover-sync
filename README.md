@@ -107,3 +107,8 @@ If you need to force a full re-sync from the web:
 3. Click **Run workflow**.
 4. In the "Number of books" input, type **0** (or leave empty) to sync EVERYTHING.
 5. Click **Run workflow**.
+
+---
+
+## Feedback & Support
+If you encounter any issues or have feature requests, please **[Open an Issue](https://github.com/yourusername/goodreads-hardcover-sync/issues)** on GitHub. This is the best way to reach me and allows others to see solutions to common problems.
