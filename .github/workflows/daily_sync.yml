@@ -2,8 +2,8 @@ name: Kindle to Hardcover Sync
 
 on:
   schedule:
-    # Runs at minute 0 of every hour
-    - cron: '0 * * * *'
+    # Runs at minute 0 of hour 0 (midnight) every day
+    - cron: '0 0 * * *'
   # Allows you to run manually from GitHub Actions tab
   workflow_dispatch:
     inputs:

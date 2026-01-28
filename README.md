@@ -85,7 +85,7 @@ npm run sync -- --dry-run
 
 ## GitHub Actions Setup (Free)
 
-This script is optimized to run **hourly** on GitHub Actions for free (approx. 720 minutes/year usage vs 2000 free minutes).
+This script is optimized to run **daily** on GitHub Actions for free (negligible usage per year vs 2000 free minutes).
 
 ### 1. Configure Secrets
 Go to your repository on GitHub:
@@ -97,7 +97,7 @@ Go to your repository on GitHub:
     - `HARDCOVER_API_TOKEN`
 
 ### 2. The Automation
-- The workflow runs **automatically fast** (checking only the last 10 books) every hour.
+- The workflow runs **automatically fast** (checking only the last 10 books) once a day.
 - This prevents "retry storms" and keeps your billable minutes extremely low.
 
 ### 3. Manual Full Sync via GitHub
